@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <title>Joey - flat minimal</title>
+  <rect width="1080" height="1080" fill="#CFE6F0"/>
+  <g id="character" transform="translate(-65 -82) scale(1.12)">
+  <g id="body">
+    <path d="M230 1080 C230 800 330 700 540 700 C750 700 850 800 850 1080 Z" fill="#F3DBA2"/>
+    <ellipse id="chest" cx="540" cy="900" rx="205" ry="180" fill="#FBF0D6"/>
+    <ellipse id="paw-left" cx="440" cy="1000" rx="62" ry="48" fill="#FFF8E8"/>
+    <ellipse id="paw-right" cx="640" cy="1000" rx="62" ry="48" fill="#FFF8E8"/>
+  </g>
+  <g id="head">
+    <g id="ear-left"><path d="M420 290 C300 250 195 390 205 560 C212 675 310 705 355 630 C395 560 410 420 440 330 Z" fill="#D49C4C"/></g>
+    <g id="ear-right"><g transform="matrix(-1 0 0 1 1080 0)"><path d="M420 290 C300 250 195 390 205 560 C212 675 310 705 355 630 C395 560 410 420 440 330 Z" fill="#D49C4C"/></g></g>
+    <ellipse id="skull" cx="540" cy="465" rx="255" ry="240" fill="#F3DBA2"/>
+    <ellipse id="muzzle" cx="540" cy="565" rx="160" ry="125" fill="#FCF3DC"/>
+    <g id="eye-left"><circle cx="425" cy="425" r="30" fill="#2B1D19"/><circle cx="435" cy="414" r="9" fill="#fff"/></g>
+    <g id="eye-right"><circle cx="655" cy="425" r="30" fill="#2B1D19"/><circle cx="665" cy="414" r="9" fill="#fff"/></g>
+    <g id="brows"><path d="M385 370 Q425 345 465 365" stroke="#C48B3E" stroke-width="14" stroke-linecap="round" fill="none"/><path d="M615 365 Q655 345 695 370" stroke="#C48B3E" stroke-width="14" stroke-linecap="round" fill="none"/></g>
+    <g id="nose"><path d="M483 490 C483 462 597 462 597 490 C597 522 562 543 540 543 C518 543 483 522 483 490Z" fill="#3A2A25"/></g>
+    <g id="mouth">
+      <clipPath id="mclip"><path id="mouth-open" d="M420 548 Q540 612 660 548 Q650 702 540 706 Q430 702 420 548Z"/></clipPath>
+      <path d="M420 548 Q540 612 660 548 Q650 702 540 706 Q430 702 420 548Z" fill="#6B2B35"/>
+      <g clip-path="url(#mclip)"><path id="tongue" d="M470 645 Q540 595 610 645 Q620 715 540 718 Q460 715 470 645Z" fill="#F57F93"/><path d="M540 625 V690" stroke="#E0586F" stroke-width="8" stroke-linecap="round"/></g>
+      <path d="M410 540 Q396 538 388 520 M670 540 Q684 538 692 520" stroke="#C48B3E" stroke-width="9" stroke-linecap="round" fill="none"/>
+      <path d="M540 543 V584" stroke="#3A2A25" stroke-width="9" stroke-linecap="round"/>
+    </g>
+  </g>
+</g>
+</svg>

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <title>Joey - rounded cartoon</title>
+  <defs>
+    <clipPath id="headclip"><ellipse cx="540" cy="465" rx="260" ry="240"/></clipPath>
+    <clipPath id="mclip"><path d="M418 548 Q540 614 662 548 Q652 704 540 708 Q428 704 418 548Z"/></clipPath>
+    <path id="earshape" d="M425 285 C300 240 190 380 200 560 C208 680 315 715 362 630 C405 555 415 420 445 330 Z"/>
+    <path id="earinner" d="M400 330 C310 310 235 420 245 560 C252 640 312 650 340 600 C375 535 385 430 400 330Z"/>
+  </defs>
+  <rect width="1080" height="1080" fill="#CDE8E4"/>
+  <circle cx="860" cy="200" r="120" fill="#DCF1EC"/><circle cx="170" cy="330" r="70" fill="#DCF1EC"/>
+  <g id="character" transform="translate(-65 -75) scale(1.12)">
+  <g id="body">
+    <path d="M225 1080 C225 810 330 710 540 710 C750 710 855 810 855 1080 Z" fill="#F0D08C"/>
+    <path id="chest" d="M540 745 C690 745 770 830 770 940 C770 1010 740 1050 700 1080 L380 1080 C340 1050 310 1010 310 940 C310 830 390 745 540 745Z" fill="#FBEFD3"/>
+    <path d="M450 830 l14 34 l14 -34 M510 880 l14 34 l14 -34 M600 835 l14 34 l14 -34 M380 920 l12 30 l12 -30 M680 925 l12 30 l12 -30" fill="none" stroke="#EAD3A3" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <ellipse id="paw-left" cx="430" cy="1010" rx="68" ry="52" fill="#FFF8E8"/>
+    <ellipse id="paw-right" cx="650" cy="1010" rx="68" ry="52" fill="#FFF8E8"/>
+    <path d="M410 1030 v-20 M435 1035 v-24 M460 1030 v-20 M630 1030 v-20 M655 1035 v-24 M680 1030 v-20" stroke="#E8D4A8" stroke-width="7" stroke-linecap="round"/>
+  </g>
+  <g id="head">
+    <g id="ear-left"><use href="#earshape" fill="#D9A04F"/><use href="#earinner" fill="#C4883A"/></g>
+    <g id="ear-right"><g transform="matrix(-1 0 0 1 1080 0)"><use href="#earshape" fill="#D9A04F"/><use href="#earinner" fill="#C4883A"/></g></g>
+    <ellipse id="skull" cx="540" cy="465" rx="260" ry="240" fill="#F5DDA5"/>
+    <g clip-path="url(#headclip)">
+      <ellipse cx="540" cy="285" rx="120" ry="36" fill="#FBEBC3" opacity=".55"/>
+      <ellipse cx="260" cy="520" rx="60" ry="200" fill="#EBCB88"/>
+      <ellipse cx="820" cy="520" rx="60" ry="200" fill="#EBCB88"/>
+    </g>
+    <ellipse id="muzzle" cx="540" cy="568" rx="165" ry="128" fill="#FDF4DD"/>
+    <ellipse cx="362" cy="505" rx="38" ry="26" fill="#F4A9A0" opacity=".45"/>
+    <ellipse cx="718" cy="505" rx="38" ry="26" fill="#F4A9A0" opacity=".45"/>
+    <g id="brows"><path d="M382 372 Q425 338 470 362" stroke="#C48B3E" stroke-width="15" stroke-linecap="round" fill="none"/><path d="M610 362 Q655 338 698 372" stroke="#C48B3E" stroke-width="15" stroke-linecap="round" fill="none"/></g>
+    <g id="eye-left"><ellipse cx="425" cy="440" rx="34" ry="38" fill="#2B1D19"/><ellipse cx="427" cy="445" rx="22" ry="26" fill="#4A2F25"/><circle cx="437" cy="427" r="12" fill="#fff"/><circle cx="416" cy="456" r="5" fill="#fff" opacity=".8"/></g>
+    <g id="eye-right"><ellipse cx="655" cy="440" rx="34" ry="38" fill="#2B1D19"/><ellipse cx="653" cy="445" rx="22" ry="26" fill="#4A2F25"/><circle cx="665" cy="427" r="12" fill="#fff"/><circle cx="644" cy="456" r="5" fill="#fff" opacity=".8"/></g>
+    <g id="nose">
+      <path d="M480 498 C480 466 600 466 600 498 C600 532 564 552 540 552 C516 552 480 532 480 498Z" fill="#3B2A25"/>
+      <path d="M492 490 C500 472 580 472 588 490 C560 482 520 482 492 490Z" fill="#5A453E"/>
+      <ellipse cx="515" cy="486" rx="16" ry="7" fill="#fff" opacity=".55"/>
+    </g>
+    <g id="mouth">
+      <path id="mouth-open" d="M418 548 Q540 614 662 548 Q652 704 540 708 Q428 704 418 548Z" fill="#6B2B35"/>
+      <g clip-path="url(#mclip)">
+        <path id="tongue" d="M465 650 Q540 596 615 650 Q630 725 540 728 Q450 725 465 650Z" fill="#F57F93"/>
+        <path d="M465 680 Q540 720 615 680 Q620 725 540 728 Q460 725 465 680Z" fill="#E4627A"/>
+        <path d="M540 628 V690" stroke="#D95470" stroke-width="7" stroke-linecap="round"/>
+      </g>
+      <path d="M540 552 V590" stroke="#3B2A25" stroke-width="9" stroke-linecap="round"/>
+      <path d="M408 556 Q392 556 384 540 M672 556 Q688 556 696 540" stroke="#C48B3E" stroke-width="9" stroke-linecap="round" fill="none"/>
+    </g>
+  </g>
+  </g>
+</svg>
