@@ -47,11 +47,16 @@ Starting from zero (no accounts yet). Last updated: 2026-10-20.
 | Approval | Gmail MCP | connected |
 | Publish | YouTube Data API v3, Instagram API | needs accounts |
 
+## Accounts created
+
+- Gmail: askjoey.ai@gmail.com
+- Instagram (main): askjoey.ai
+
 ## User to-do (not blocking POCs)
 
 - [ ] Pick the retriever's voice from generated candidates
 - [ ] Create main + sandbox YouTube channels (Brand Accounts under one Google account is fine)
-- [ ] Create main + sandbox Instagram **Professional** accounts (sandbox = private)
+- [ ] Switch askjoey.ai to Professional (Creator); create sandbox Instagram Professional account
 - [ ] Google Cloud project: enable YouTube Data API v3, OAuth consent; **apply for API audit early** (unaudited projects can only upload as private)
 - [ ] Meta developer app with Instagram API (Instagram Login) + content publishing permission
 - [ ] Download ~20 royalty-free music tracks (check each license)
