@@ -43,7 +43,7 @@ def build_hugsy(location=(0, 0, 0), seed=11):
     belly = build_mesh_obj('Hugsy_Belly', [
         ((0, -0.15, 0.44), (0.40, 0.34, 0.37)),
         ((0, -0.20, 0.30), (0.38, 0.32, 0.26)),
-        ((0, -0.12, 0.60), (0.31, 0.30, 0.22)),
+        ((0, -0.12, 0.62), (0.32, 0.30, 0.24)),
     ])
     facet(belly, voxel=0.028, tris=560, lump=0.02, seed=seed + 1)
     assign(belly, mats['cream'])
@@ -124,8 +124,8 @@ def build_hugsy(location=(0, 0, 0), seed=11):
     # ---- fabric tag on the right flank
     tag = box_obj('Hugsy_Tag', (0.012, 0.07, 0.10), bevel=0.008)
     finish(tag); assign(tag, mats['tag'])
-    tag.location = (0.52, 0.12, 0.30); tag.rotation_euler = (0.0, 0.0, 0.0)
-    tag.rotation_euler = (0.15, -0.35, 0.1)
+    tag.location = (0.465, 0.10, 0.32); tag.rotation_euler = (0.0, 0.0, 0.0)
+    tag.rotation_euler = (0.0, 0.45, 0.0)
 
     # ---- hierarchy
     for ob in (belly, face, flip['L'], flip['R'], feet['L'], feet['R'], tag, eyes['L'], eyes['R'], brows, ub):

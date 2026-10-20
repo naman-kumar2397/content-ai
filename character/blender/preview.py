@@ -74,18 +74,18 @@ def setup_bokeh():
     import random
     rnd = random.Random(7)
     pal = [(1.0, 0.62, 0.25), (1.0, 0.78, 0.45), (0.45, 0.62, 1.0), (0.9, 0.9, 1.0), (1.0, 0.45, 0.35)]
-    for i in range(46):
+    for i in range(70):
         big = rnd.random() < 0.18
-        r = rnd.uniform(0.22, 0.38) if big else rnd.uniform(0.04, 0.17) ** 1.0
+        r = rnd.uniform(0.22, 0.38) if big else rnd.uniform(0.03, 0.15)
         c = rnd.choice(pal); k = rnd.uniform(0.6, 1.0)
         col = (c[0] * k, c[1] * k, c[2] * k, 1)
         d = rnd.uniform(5.2, 9.0)
         bpy.ops.mesh.primitive_uv_sphere_add(radius=r * d / 6.5, segments=12, ring_count=8,
-            location=(rnd.uniform(-5.5, 5.5) * d / 6.5, d, rnd.uniform(1.4, 6.8)))
+            location=(rnd.uniform(-3.4, 3.8) * d / 6.5, d, rnd.uniform(1.6, 6.2)))
         o = bpy.context.object; o.name = 'Bokeh%d' % i
         m = bpy.data.materials.new('Bk%d' % i); m.use_nodes = True; nt = m.node_tree
         nt.nodes.clear(); em = nt.nodes.new('ShaderNodeEmission'); em.inputs['Color'].default_value = col
-        em.inputs['Strength'].default_value = rnd.uniform(0.5, 1.8)
+        em.inputs['Strength'].default_value = rnd.uniform(0.3, 1.1)
         out = nt.nodes.new('ShaderNodeOutputMaterial'); nt.links.new(em.outputs[0], out.inputs[0])
         o.data.materials.append(m)
         o.visible_shadow = False
@@ -143,7 +143,7 @@ def build_scene(joey=True, ball=True, hugsy=False):
     if hugsy:
         if joey:
             h = build_hugsy.build_hugsy(HUGSY_POS)
-            h.rotation_euler = (-0.12, 0, -0.55)   # turned toward Joey, chin up
+            h.rotation_euler = (-0.2, 0, -0.85)   # turned toward Joey, chin up
         else:
             h = build_hugsy.build_hugsy((0, 0, 0))
     return j, b, h
