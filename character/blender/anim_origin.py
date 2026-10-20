@@ -14,8 +14,8 @@ def A(n, d):
     return argv[argv.index(n) + 1] if n in argv else d
 
 # ---- reuse preview.py scene setup without triggering its renders ----
-_src = open(os.path.join(HERE, 'preview.py')).read().split("if ONLY in ('all', 'joey')")[0]
-NS = {'__file__': os.path.join(HERE, 'preview.py'), '__name__': 'preview_setup'}
+_src = open(os.path.join(HERE, 'preview_duo_base.py')).read().split("if ONLY in ('all', 'joey')")[0]
+NS = {'__file__': os.path.join(HERE, 'preview_duo_base.py'), '__name__': 'preview_setup'}
 sys.argv = [sys.argv[0], '--'] + ['--out', '/tmp/_unused_preview', '--samples', A('--samples', '16')]
 exec(compile(_src, 'preview.py', 'exec'), NS)
 sys.argv = ['blender', '--'] + argv

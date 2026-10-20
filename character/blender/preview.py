@@ -7,18 +7,19 @@ sys.path.insert(0, HERE)
 import bpy
 from mathutils import Vector
 import importlib
-import common, build_joey, build_ball
+import common, build_joey, build_ball, build_hugsy
 
 ROOT = os.path.abspath(os.path.join(HERE, '..'))
 args = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 def arg(n, d):
     return args[args.index(n) + 1] if n in args else d
 SCALE = int(arg('--scale', 100)); SAMPLES = int(arg('--samples', 48))
-ONLY = arg('--only', 'all'); OUT = arg('--out', os.path.join(ROOT, 'renders'))
+ONLY = arg('--only', 'all'); SIDEKICK = arg('--sidekick', 'hugsy'); THREADS = int(arg('--threads', 2)); OUT = arg('--out', os.path.join(ROOT, 'renders'))
 os.makedirs(OUT, exist_ok=True)
 
 JOEY_POS = (0.0, 0.0, 0.0)
 BALL_POS = (1.18, -0.95, 0.0)
+HUGSY_POS = (1.30, -1.0, 0.0)
 
 
 def look_at(ob, target):
@@ -69,18 +70,22 @@ def setup_desk():
 
 
 def setup_bokeh():
+    """Dim, size-varied out-of-focus 'city window' lights at varied depth."""
     import random
-    rnd = random.Random(4)
-    for i in range(28):
-        warm = rnd.random() < 0.6
-        col = (1.0, rnd.uniform(0.55, 0.8), rnd.uniform(0.2, 0.4), 1) if warm else (0.35, rnd.uniform(0.5, 0.7), 1.0, 1)
-        r = rnd.uniform(0.10, 0.28)
-        bpy.ops.mesh.primitive_uv_sphere_add(radius=r, segments=12, ring_count=8,
-            location=(rnd.uniform(-4.5, 4.5), 6.5, rnd.uniform(1.2, 6.5)))
+    rnd = random.Random(7)
+    pal = [(1.0, 0.62, 0.25), (1.0, 0.78, 0.45), (0.45, 0.62, 1.0), (0.9, 0.9, 1.0), (1.0, 0.45, 0.35)]
+    for i in range(46):
+        big = rnd.random() < 0.18
+        r = rnd.uniform(0.22, 0.38) if big else rnd.uniform(0.04, 0.17) ** 1.0
+        c = rnd.choice(pal); k = rnd.uniform(0.6, 1.0)
+        col = (c[0] * k, c[1] * k, c[2] * k, 1)
+        d = rnd.uniform(5.2, 9.0)
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=r * d / 6.5, segments=12, ring_count=8,
+            location=(rnd.uniform(-5.5, 5.5) * d / 6.5, d, rnd.uniform(1.4, 6.8)))
         o = bpy.context.object; o.name = 'Bokeh%d' % i
         m = bpy.data.materials.new('Bk%d' % i); m.use_nodes = True; nt = m.node_tree
         nt.nodes.clear(); em = nt.nodes.new('ShaderNodeEmission'); em.inputs['Color'].default_value = col
-        em.inputs['Strength'].default_value = rnd.uniform(2, 5.5)
+        em.inputs['Strength'].default_value = rnd.uniform(0.5, 1.8)
         out = nt.nodes.new('ShaderNodeOutputMaterial'); nt.links.new(em.outputs[0], out.inputs[0])
         o.data.materials.append(m)
         o.visible_shadow = False
@@ -121,24 +126,34 @@ def setup_render(w, h, out):
     try: s.view_settings.look = 'Medium High Contrast'
     except Exception: pass
     s.render.filepath = out
+    s.render.threads_mode = 'FIXED'; s.render.threads = THREADS
 
 
 def reset():
     bpy.ops.wm.read_factory_settings(use_empty=True)
 
 
-def build_scene(joey=True, ball=True):
+def build_scene(joey=True, ball=True, hugsy=False):
     reset(); setup_world(); setup_desk(); setup_bokeh()
     j = build_joey.build_joey(JOEY_POS) if joey else None
-    b = build_ball.build_ball(BALL_POS, yaw=-0.5, tilt=-0.12) if (ball and joey) else (build_ball.build_ball((0, 0, 0)) if ball else None)
-    return j, b
+    b = None
+    if ball:
+        b = build_ball.build_ball(BALL_POS, yaw=-0.5, tilt=-0.12) if joey else build_ball.build_ball((0, 0, 0))
+    h = None
+    if hugsy:
+        if joey:
+            h = build_hugsy.build_hugsy(HUGSY_POS)
+            h.rotation_euler = (-0.12, 0, -0.55)   # turned toward Joey, chin up
+        else:
+            h = build_hugsy.build_hugsy((0, 0, 0))
+    return j, b, h
 
 
-def render(name, w, h, joey, ball, cam_loc, cam_tgt, lens, focus, fstop=2.8, fit='AUTO'):
-    j, b = build_scene(joey, ball)
-    f = {'joey': j, 'ball': b}[focus]
-    # focus on the head for joey (child), body otherwise
-    fo = bpy.data.objects['Joey_Head'] if focus == 'joey' else f
+def render(name, w, h, joey, ball, cam_loc, cam_tgt, lens, focus, fstop=2.8, fit='AUTO', hugsy=False):
+    j, b, hg = build_scene(joey, ball, hugsy)
+    if focus == 'joey': fo = bpy.data.objects['Joey_Head']
+    elif focus == 'hugsy': fo = bpy.data.objects['Hugsy_Face']
+    else: fo = b
     setup_lights(cam_tgt)
     setup_camera(cam_loc, cam_tgt, lens, fo, fstop, fit)
     out = os.path.join(OUT, name + '.png')
@@ -150,9 +165,14 @@ def render(name, w, h, joey, ball, cam_loc, cam_tgt, lens, focus, fstop=2.8, fit
 
 if ONLY in ('all', 'joey'):
     render('joey_front', 1080, 1350, True, False, (-0.9, -8.2, 2.0), (0, 0, 1.15), 85, 'joey')
-if ONLY in ('all', 'ball'):
+if ONLY == 'ball' or (ONLY == 'all' and SIDEKICK == 'ball'):
     render('ball_front', 1080, 1350, False, True, (-0.4, -3.6, 0.9), (0, 0, 0.5), 85, 'ball', 2.8)
+if ONLY in ('hugsy', 'all') and SIDEKICK == 'hugsy':
+    render('hugsy_front', 1080, 1350, False, False, (-0.5, -4.2, 0.95), (0, 0, 0.62), 85, 'hugsy', 2.8, hugsy=True)
 if ONLY in ('all', 'duo'):
-    render('duo', 1080, 1920, True, True, (0.2, -6.5, 1.35), (0.50, 0, 1.95), 65, 'joey', 3.2, 'HORIZONTAL')
-    if SCALE == 100 and ONLY == 'all':
+    if SIDEKICK == 'ball': render('duo', 1080, 1920, True, True, (0.2, -6.5, 1.35), (0.50, 0, 1.95), 65, 'joey', 3.2, 'HORIZONTAL')
+    else: render('duo_hugsy', 1080, 1920, True, False, (0.2, -6.5, 1.35), (0.50, 0, 1.95), 65, 'joey', 3.2, 'HORIZONTAL', hugsy=True)
+    if SCALE == 100 and ONLY == 'all' and SIDEKICK == 'ball':
         bpy.ops.wm.save_as_mainfile(filepath=os.path.join(HERE, 'characters.blend'))
+    if SCALE == 100 and ONLY in ('all', 'duo') and SIDEKICK == 'hugsy':
+        bpy.ops.wm.save_as_mainfile(filepath=os.path.join(HERE, 'characters_hugsy.blend'))
