@@ -90,6 +90,12 @@ Starting from zero (no accounts yet). Last updated: 2026-10-20.
 - Tools note: Instagram reels can't be downloaded from the container (HTTP 429). Agent-Reach needs a desktop Chrome login → not usable here. Working method: embed page (`/reel/<id>/embed/captioned/`) gives caption + cover frames.
 - Implication: Joey as a **low-poly 3D golden retriever** rendered in **Blender** (free, scriptable via Python, CPU render). Risk: CPU render time per frame — POC needed.
 
+## Hugsy — second character (decided 2026-10-20, replaces the tennis ball)
+
+- **Hugsy**, a **penguin plush toy** — nod to Joey's stuffed penguin in *Friends* (Joey's name is also from Friends). Our own design, not a replica of the show prop; no catchphrases or show clips.
+- Personality: deadpan, sarcastic know-it-all (default unless user changes it). Teacher role in the "Explain it like I'm a dog" series (flipper points at whiteboard).
+- Low-poly plush in the same style as Joey; separate flippers, eyes, beak for gestures/blinks.
+
 ## Joey — based on the user's real dog
 
 Character is modelled on the user's own golden retriever, Joey (channel named after him). Key traits from reference photo:
