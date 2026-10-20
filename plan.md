@@ -85,6 +85,9 @@ Starting from zero (no accounts yet). Last updated: 2026-10-20.
 ## Style reference (user likes, 2026-10-20)
 
 - @canwebuildthis reel DePGWqgThxq (19K followers): **low-poly 3D character**, Blender-style render, warm cinematic key light, blurred night-city window background (depth of field), simple deadpan face (dot eyes, tiny mouth), white bold captions in dark rounded box at top. Format: **comedic skit — character talking to "Claude"**. Caption ends with an engagement question.
+- @canwebuildthis reel Det_3TmTAsF — **series format** "EXPLAIN IT LIKE I'M FIVE · PART 1 — What's an API?": daytime office set (window, city, bookshelf), **whiteboard** with stick-figure diagram (YOU → ? → KITCHEN), **technical words crossed out in red** ("no technical words allowed"), the sidekick holds a pointer stick. Cover frame = big bold title (white + accent colour) + small pill label for the series/part. Caption ends with a question picking the next episode ("which tech word should Claude explain next?").
+- **Our adaptation:** recurring series **"Explain it like I'm a dog 🐶"** — Joey asks, the Ball explains with a whiteboard + dog-world analogies (API = playing fetch, etc.). Numbered parts; ask audience for next topic. Cover frame with series pill + big title.
+- Tools note: Instagram reels can't be downloaded from the container (HTTP 429). Agent-Reach needs a desktop Chrome login → not usable here. Working method: embed page (`/reel/<id>/embed/captioned/`) gives caption + cover frames.
 - Implication: Joey as a **low-poly 3D golden retriever** rendered in **Blender** (free, scriptable via Python, CPU render). Risk: CPU render time per frame — POC needed.
 
 ## Joey — based on the user's real dog
