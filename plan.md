@@ -82,6 +82,11 @@ Starting from zero (no accounts yet). Last updated: 2026-10-20.
 - Content mix: news vs tutorials vs "repo of the day".
 - Joey's art style + framing + signature item.
 
+## Style reference (user likes, 2026-10-20)
+
+- @canwebuildthis reel DePGWqgThxq (19K followers): **low-poly 3D character**, Blender-style render, warm cinematic key light, blurred night-city window background (depth of field), simple deadpan face (dot eyes, tiny mouth), white bold captions in dark rounded box at top. Format: **comedic skit — character talking to "Claude"**. Caption ends with an engagement question.
+- Implication: Joey as a **low-poly 3D golden retriever** rendered in **Blender** (free, scriptable via Python, CPU render). Risk: CPU render time per frame — POC needed.
+
 ## Joey — based on the user's real dog
 
 Character is modelled on the user's own golden retriever, Joey (channel named after him). Key traits from reference photo:
