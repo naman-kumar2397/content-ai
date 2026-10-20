@@ -92,7 +92,7 @@ Starting from zero (no accounts yet). Last updated: 2026-10-20.
 
 ## Hugsy — second character (decided 2026-10-20, replaces the tennis ball)
 
-- **Hugsy**, a **penguin plush toy** — nod to Joey's stuffed penguin in *Friends* (Joey's name is also from Friends). Our own design, not a replica of the show prop; no catchphrases or show clips.
+- **Hugsy**, a **penguin plush toy** — **faithful copy of the Friends Hugsy** (user decision 2026-10-20, risk accepted: copyright claims / monetisation review on the channel). Reference: `character/reference/hugsy_reference.jpg` — checkered + dotted red knit hat with cream pom-pom, swim goggles over eyes, yellow beak, yellow quilted vest with red/white striped hem, red/white checked scarf with black fringe, black flippers, yellow feet.
 - Personality: deadpan, sarcastic know-it-all (default unless user changes it). Teacher role in the "Explain it like I'm a dog" series (flipper points at whiteboard).
 - Low-poly plush in the same style as Joey; separate flippers, eyes, beak for gestures/blinks.
 
