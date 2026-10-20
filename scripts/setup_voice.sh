@@ -19,6 +19,13 @@ if ! $VPY -c "import chatterbox" 2>/dev/null; then
   $VPY -m pip install -q chatterbox-tts >>"$LOG" 2>&1 || { tail -20 "$LOG"; exit 1; }
 fi
 
+command -v espeak-ng >/dev/null || { echo "Installing espeak-ng..."; apt-get install -y -qq espeak-ng >>"$LOG" 2>&1; }
+if ! $VPY -c "import kokoro, faster_whisper" 2>/dev/null; then
+  echo "Installing kokoro + faster-whisper..."
+  $VPY -m pip install -q kokoro soundfile faster-whisper >>"$LOG" 2>&1 || { tail -20 "$LOG"; exit 1; }
+  $VPY -c "import torch; assert torch.__version__.startswith('2.6.0'), torch.__version__"
+fi
+
 echo "Pre-downloading model weights..."
 $VPY - <<'PYEOF'
 from huggingface_hub import snapshot_download
