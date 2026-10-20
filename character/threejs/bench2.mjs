@@ -66,7 +66,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     console.log(`\n| config (${backend}) | s/frame (render+readback) | raw POST s | PNG encode s | pipelined render+capture s/frame | plate s (once) |\n|---|---|---|---|---|---|`);
     for (const r of rows) console.log(`| ${r.name} | **${r.frame.toFixed(2)}** | ${r.post.toFixed(2)} | ${r.png.toFixed(2)} | ${r.pipelined.toFixed(2)} | ${r.plate.toFixed(1)} |`);
   } else {
-    const opts = { ...CONFIGS['layered plate, MSAA4, PCF 1024'], ...JSON.parse(A('--json', '{}')) };
+    const opts = { ...CONFIGS['layered plate, MSAA4, VSM 1024'], ...JSON.parse(A('--json', '{}')) };
     const n = +A('--frames', 48);
     for (const w of (A('--workers', '1,2,3')).split(',').map(Number)) {
       const r = await animate({ opts, fps: 24, n, workers: w, out: path.join(HERE, 'out', `bench_w${w}.mp4`), backend, dedupe: false });

@@ -175,8 +175,8 @@ async function setup(opts = {}) {
   const o = Object.assign({
     w: 1080, h: 1920, plate: true, ao: 'baked', dof: true, dofN: 40, plateDofN: 160, aa: 'msaa', msaa: 4,
     shadows: true, shadowSize: 1024, shadowFocus: 0.45, rimShadow: true, shadowType: 'vsm', overscan: 1.08,
-    tone: 'agx', exposure: 0.42, env: 0.3, hemi: 0.55, key: 0.8, rim: 1.5, fill: 1, desk: 0.55, deskSpec: 0.35,
-    sheen: 0.15, bakeAO: 0.85, bakeDirAO: 0.35, bakeGI: 0.9, dofBoost: 8, band: 1.4, city: 3.2, screen: 1.6,
+    tone: 'agx', exposure: 0.42, env: 0.3, hemi: 0.35, key: 0.8, rim: 1.5, fill: 1, desk: 0.55, deskSpec: 0.35,
+    sheen: 0.15, bakeAO: 0.85, bakeDirAO: 0.35, bakeGI: 2.0, dofBoost: 8, band: 1.4, city: 3.2, screen: 1.6,
     seed: 1, timeline: null,
   }, opts);
   const sc = await (await fetch(GLTF_DIR + 'scene2.json')).json();

@@ -1,5 +1,171 @@
 # three.js renderer POC
 
+## Round 2: speed + detail
+
+![Round 1 vs Round 2](compare_v2.jpg)
+
+**Result:** at 1080×1920 the full-quality frame costs **0.26 s** (render + capture + H.264 encode). The Round 1 pipeline, measured
+on the same host in the same run, costs **4.8 s**. The target was ≤ 2 s. Most of the gain comes from switching the software GL
+backend (SwiftShader → Mesa llvmpipe, about 5×) and from rendering the static background only once per shot (about 3×).
+Everything stays deterministic. The demo is [`out/demo_v2.mp4`](out/demo_v2.mp4): 6 s, 30 fps, with audio.
+It renders in **50 s of wall time**, so a 25 s short at 30 fps takes about 3.3 min instead of about 1 h.
+
+### What changed
+
+**Assets** (`character/blender/export_gltf_v2.py`, which writes `joey2.glb`, `hugsy2.glb`, `props.glb`, `whiteboard.glb` and `scene2.json`).
+The v1 exporter is untouched, so the baseline can still be reproduced.
+- **Baked AO + GI.** Cycles bakes the duo in place, with the desk, wall and lights, to a second per-corner colour attribute
+  (`COLOR_1`: rgb = indirect diffuse irradiance, a = AO). It runs once per export and takes about 90 s at 64 spp. In three.js an
+  `onBeforeCompile` hook uses AO to occlude the ambient and environment light (and 35 % of the direct light, for contact
+  darkening) and adds `albedo × irradiance` as a warm bounce. Runtime GTAO is off.
+- **Morph targets** (Blender shape keys exported as glTF morphs; flat shading still faceted because normals come from derivatives):
+  - Joey muzzle, head and mouth: `Wide`, `Narrow`, `Smile` (cheek squash), and `Close` (the upper lip drops over the carved mouth, so M/B/P really close).
+  - Joey jaw: `Wide`, `Narrow`, `FV`. Joey tongue: `In`, `Up`.
+  - New low-poly **brow tufts** `Joey_Brows`: `Up`, `Down`, `Worried`, `Angry`.
+  - Hugsy beak: `Open` (upper and lower). Hugsy body, belly and face: `Squash` / `Stretch`. These share one world-space field, so the separate meshes stay glued together.
+  - Hugsy brows: `InnerDown` (flat/deadpan), `InnerUp`, `Raise` (sarcastic, one side).
+- **Set dressing** in the same faceted style: a laptop with a glowing code screen, a mug, a plant, and a window frame. The wall
+  now has a real opening onto a procedural night city with lit windows that blur into bokeh. This replaces the floating bokeh
+  spheres. A **whiteboard** asset is exported for future explainers but isn't placed in this shot.
+
+**Renderer** (`scene2.js`, `render2.mjs`, `bench2.mjs`)
+- **Plate + character layer.** The background (wall, window, city, desk, props) is rendered once per shot into an HDR plate,
+  with DOF (160-tap gather, a stylised aperture that only blurs outside a focus band around the characters). The *rest-pose
+  shadows of the characters* are included. Gotcha: three.js picks shadow casters using the **main camera's** layers, so the
+  characters stay in that pass with colour and depth writes turned off.
+  Each frame then renders only the characters, with MSAA 4×, inside their screen rect for the whole shot (`setViewOffset`,
+  68 % of the frame here). One composite pass then reprojects the plate through the plane at the focus distance (this is exact
+  for rotations and the handheld drift, and approximate for the slow push-in), lays the characters over it, and applies AgX
+  tone mapping. Against a full per-frame render the mean difference is **2/255**: the plate's character shadows don't follow
+  the animation, but the differences are tiny.
+  The `--no-plate` full mode is still available for moving cameras: 0.7 s/frame with baked AO + DOF on llvmpipe.
+- **Backend:** Mesa **llvmpipe** via `--use-angle=gl` in a *headed* Chromium under `xvfb-run`. Headless Chromium silently
+  falls back to SwiftShader. On the same frames, llvmpipe output matches SwiftShader to within 0.3/255 mean.
+- **Capture:** `readPixels` gives RGBA8, which goes to `fetch(POST, new Blob([px]))`, then the Node server, then ffmpeg stdin
+  (`rawvideo`, vflip). The `Blob` matters: a raw `Uint8Array` body takes 346 ms per 8 MB frame, a Blob takes 60 ms.
+  Upload of frame *i* overlaps rendering of frame *i+1*.
+- **Shadows:** VSM 1024 with `shadow.focus` 0.45 (a tighter frustum, so the same detail as 2048), and `normalBias` 0.03,
+  which removes the speckle and seam acne along mesh intersections.
+
+**Animation** (`anim.js`). Pure function of t. Springs are stepped at a fixed 1/240 s from t = 0, so any frame order gives the same result.
+- **Lip-sync:** Rhubarb cues (A–H, X) → jaw angle + `Close`/`Wide`/`Narrow`/`FV` morphs and the tongue, with 60 ms crossfades
+  and a spring on the jaw. Between lines Joey goes back to his open "happy pant".
+- **Secondary motion:** the ears are pendulum springs driven by the head's angular acceleration. The tongue lags the jaw.
+  The head follows its target through a spring, which gives follow-through. Hugsy's far flipper follows through, and his body
+  squashes and stretches (volume-preserving scale + `Squash`/`Stretch` morphs) on the flipper move.
+- **Acting:** easing with anticipation and overshoot (`anticOver`). Joey's excited head pop starts with a frown dip.
+  Hugsy does a deadpan squint (half lids, flat brows), glances at the camera, raises the near flipper at Joey, and then raises
+  one brow sarcastically. Joey then tilts his head with worried brows.
+- **Idle life:** breathing on both characters, smoothed-noise head drift, eye saccades, seeded natural blinks (2–5.5 s gaps,
+  some doubles), and handheld camera drift (about 0.15°, about 1 cm) on top of a 7 % push-in.
+
+**Voice:** Chatterbox with the repo's `joey` preset (`scripts/tts.py --voice joey`, set up with `scripts/setup_voice.sh`)
+says "Whoa! This robot just learned to make pancakes!" (3.4 s). Generation took 185 s on CPU while Blender was baking.
+The visemes come from **Rhubarb Lip Sync 1.14.0** (MIT, prebuilt Linux binary), using the text as a dialog hint.
+Both are stored in `../timelines/` (`demo_v2.json`, `demo_v2_joey.wav`).
+
+### Benchmark v2 (1080×1920, 4 vCPU, no GPU, one consistent run)
+
+The host's speed drifts between sessions: the identical Round 1 frame measured 6.0, 8.5 and 4.8 s/frame on different
+occasions. **Only compare rows within this table.** "Frame" = `renderAt` + `readPixels` (forces the GPU to finish).
+"Pipelined" = frame + upload, overlapped.
+
+| # | config | SwiftShader s/frame | llvmpipe s/frame |
+|---|---|---|---|
+| 0 | **Round 1 pipeline** (r1 scene, GTAO + DOF, MSAA 4, VSM 2048, PNG capture) | **4.78** | – |
+| 1 | v2 scene, same settings as Round 1 (GTAO + DOF, MSAA 4, VSM 2048) | 4.70 | 1.10 |
+| 2 | + baked AO/GI, GTAO off (B1) | 3.11 | 0.68 |
+| 3 | + DOF with 20 instead of 40 taps (≈ half-res DOF cost) | 2.73 | 0.55 |
+| 4 | DOF off entirely | 2.35 | 0.40 |
+| 5 | (2) + shadows 1024 + tight focus | 2.58 | 0.57 |
+| 6 | (2) + shadows 512 + tight focus | 2.37 | 0.54 |
+| 7 | **plate**: background once, characters per frame (B2), MSAA 4 | 1.16 | 0.23 |
+| 8 | plate, MSAA 2 | 1.18 | 0.23 |
+| 9 | plate, SMAA instead of MSAA | 1.03 | 0.20 |
+| 10 | plate, no AA | 0.75 | 0.14 |
+| 11 | plate, PCF-soft instead of VSM | 1.09 | 0.20 |
+| 12 | **layered plate** (characters inside their rect + one composite/tonemap pass), MSAA 4, VSM 1024 | **1.02** | **0.20** |
+| 13 | layered, MSAA 4, PCF | 0.87 | 0.20 |
+| 14 | layered, MSAA 2, PCF | 0.89 | 0.16 |
+| 15 | layered, no AA | 0.63 | 0.11 |
+
+The plate itself costs 0.8–1.7 s **once per shot**. Capture (B5): a raw Blob upload costs 0.03–0.06 s, against 0.13–0.34 s
+for a PNG encode alone (Round 1 used PNG + disk + a PNG decode in ffmpeg). Pipelined, the upload is almost fully hidden.
+
+Backend threads (row 12, llvmpipe): `LP_NUM_THREADS=2` gives 0.35 s, the default (4) gives 0.20 s, 8 gives 0.20 s.
+
+**Parallel workers (B3)**, end-to-end wall time per frame including the x264 encode, 72 frames:
+
+| workers | layered plate (row 12), llvmpipe | full mode (row 2), llvmpipe | layered plate, SwiftShader (earlier run) |
+|---|---|---|---|
+| 1 | **0.26** | 0.67 | 1.10 |
+| 2 | 0.24 | 0.61 | 1.09 |
+| 3 | 0.25 | – | 1.18 |
+
+One browser process already saturates the 4 vCPUs (both rasterisers are multithreaded), so extra workers buy ≤ 10 %
+and cost RAM. Keep **1 worker** (2 if RAM allows). The code supports N workers rendering interleaved frames.
+
+**Frame dedupe (B4)** is implemented: a pose pre-pass hashes every transform, morph weight and the camera matrix, and
+duplicate frames are re-sent instead of rendered. On this demo it found **0 duplicates**, because the idle life
+(breathing, drift, handheld camera) keeps every frame unique. It will pay off on holds, title cards and frozen
+"pause" beats.
+
+**24 vs 30 fps (A6):** at 0.26 s/frame a 25 s short costs 2.6 min at 24 fps and 3.3 min at 30 fps. **30 fps is the
+default.** Springs and noise are time-based, so the fps doesn't change the motion.
+
+### Before / after
+
+| | Round 1 | Round 2 |
+|---|---|---|
+| s/frame at 1080×1920 (same host, same run) | 4.78 (6.0 on the Round 1 host) | **0.26** end to end |
+| 25 s short | ~40–60 min | **~3.3 min @ 30 fps** |
+| AO | screen-space GTAO (subtle, view-dependent) | Cycles-baked per corner, so stable and denser in the creases |
+| Warm bounce (the main Round 1 gap) | missing; shadow sides went grey-blue | baked indirect light warms under the chin, the legs and Hugsy's belly edge. Not quite as saturated as Cycles. |
+| Background | floating emissive dots | window with a blurred night city, laptop, mug, plant |
+| Mouth | jaw sine wave | Rhubarb visemes (9 shapes), real closures on M/B/P |
+| Faces | eyes scale, a brow bar | brow morphs, cheek squash, saccades, natural blinks, deadpan lids |
+| Motion | sine waves | springs (ears, tongue, flippers, head), anticipation + overshoot, squash/stretch, breathing, handheld drift |
+| Determinism | yes | yes, including the springs (fixed-step re-sim) |
+
+Known limitations:
+- The plate's character shadows are frozen at the shot's first pose. Big moves would need `--no-plate` or a per-frame
+  shadow catcher.
+- The plate is reprojected for the push-in through the focus plane, which gives about 2 % parallax error on the
+  far wall: invisible under the blur.
+- The baked GI is for the rest pose only.
+- The Chatterbox line was generated once, and its timing drives the cues (6 s timeline).
+
+### How to run (Round 2)
+
+```bash
+mkdir -p .blender && curl -L https://download.blender.org/release/Blender4.2/blender-4.2.3-linux-x64.tar.xz | tar xJ -C .blender
+cd character/blender && ../../.blender/blender-4.2.3-linux-x64/blender -b --factory-startup -P export_gltf_v2.py -- --samples 64  # ~2.5 min (bake)
+cd ../threejs && npm install
+./make_demo_v2.sh                                   # out/demo_v2.mp4 (REGEN=1 RHUBARB=... to redo the voice + visemes)
+xvfb-run -a node render2.mjs --still --backend llvmpipe --timeline ../timelines/demo_v2.json --t 4.9 --out out/s.png
+xvfb-run -a node bench2.mjs --backend llvmpipe      # table above (drop xvfb-run/--backend for SwiftShader)
+xvfb-run -a node bench2.mjs --backend llvmpipe --throughput --workers 1,2,3
+```
+`render2.mjs` options: `--no-plate`, `--ao baked|gtao|none`, `--aa msaa|smaa|none`, `--msaa N`, `--shadow N`, `--workers N`,
+`--no-dedupe`, `--fps`, `--timeline`, `--audio`, and `--json '{…}'` for any `setup()` option (look tuning:
+`bakeGI`, `bakeAO`, `hemi`, `dofBoost`, `band`, `city`…).
+
+### Recommendation
+
+**Adopt it as the daily renderer.** Use llvmpipe + layered plate for static or slowly pushing shots (0.26 s/frame), and full
+mode (`--no-plate`, 0.7 s/frame) for shots with real camera moves. Both are well under the 2 s target, so a 25 s short takes
+3–8 minutes of CPU, and the budget now goes to voice (Chatterbox is the slow step at roughly 7–50× real time) rather than to rendering.
+
+Next:
+1. Generate the timeline from the script (shot list → camera + acting beats, Rhubarb per line).
+2. Add more viseme polish (teeth, a tongue-tip L).
+3. Add a per-frame shadow catcher option for big moves.
+4. Bake a second GI pose for close-ups.
+
+---
+
+# Round 1
+
 Can three.js in headless Chromium (software WebGL via SwiftShader, no GPU) replace Blender Cycles for the
 low-poly Joey / Ball / Hugsy shots? This folder renders the same duo shot as `character/renders/duo.png`
 from the same Blender-built meshes, and benchmarks it.
