@@ -4,7 +4,7 @@ set -e
 C=output/clips; A=$C/audio
 J=$(ffmpeg -hide_banner -i $A/mix_raw.wav -af loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json -f null - 2>&1 | sed -n '/^{/,/^}/p')
 g() { echo "$J" | python3 -c "import sys,json;print(json.load(sys.stdin)['$1'])"; }
-ffmpeg -y -hide_banner -loglevel error -i $A/mix_raw.wav -af "loudnorm=I=-16:TP=-1.5:LRA=11:measured_I=$(g input_i):measured_TP=$(g input_tp):measured_LRA=$(g input_lra):measured_thresh=$(g input_thresh):offset=$(g target_offset):linear=true,aresample=48000" -ar 48000 $A/mix.wav
+ffmpeg -y -hide_banner -loglevel error -i $A/mix_raw.wav -af "loudnorm=I=-15.2:TP=-1.0:LRA=11:measured_I=$(g input_i):measured_TP=$(g input_tp):measured_LRA=$(g input_lra):measured_thresh=$(g input_thresh):offset=$(g target_offset):linear=true,aresample=48000" -ar 48000 $A/mix.wav
 python3 - <<'P' > $A/filter.txt
 import json
 T = json.load(open('output/clips/joey_origin_timing.json'))
