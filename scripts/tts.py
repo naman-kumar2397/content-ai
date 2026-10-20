@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """CPU Chatterbox TTS CLI."""
-import argparse, os, time
+import argparse, json, os, time
 import torch
 
 def main():
@@ -10,7 +10,19 @@ def main():
     ap.add_argument("--ref", default=None, help="reference wav for voice cloning")
     ap.add_argument("--exaggeration", type=float, default=0.5)
     ap.add_argument("--cfg", type=float, default=0.5)
+    ap.add_argument("--voice", default=None, help="preset name in voice/<name>.json, e.g. joey")
+    ap.add_argument("--seed", type=int, default=None)
     a = ap.parse_args()
+
+    if a.voice:
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        with open(os.path.join(root, "voice", f"{a.voice}.json")) as f:
+            preset = json.load(f)
+        a.ref = a.ref or os.path.join(root, preset["ref"])
+        a.exaggeration, a.cfg = preset["exaggeration"], preset["cfg"]
+        a.seed = preset["seed"] if a.seed is None else a.seed
+    if a.seed is not None:
+        torch.manual_seed(a.seed)
 
     # Weights were saved on CUDA; force CPU mapping.
     _orig = torch.load

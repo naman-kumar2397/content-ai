@@ -38,7 +38,7 @@ Starting from zero (no accounts yet). Last updated: 2026-10-20.
 | Need | Tool | Status |
 |---|---|---|
 | Scheduling | Claude scheduled tasks | available |
-| Voice cloning | Chatterbox (CPU) | **in setup** |
+| Voice | Chatterbox (CPU), preset `voice/joey.json` | done |
 | Captions timing | faster-whisper (MIT) | todo |
 | Lip sync | Rhubarb Lip Sync (MIT) | todo |
 | Render | Playwright + Chromium, ffmpeg | available in container |
@@ -54,7 +54,7 @@ Starting from zero (no accounts yet). Last updated: 2026-10-20.
 
 ## User to-do (not blocking POCs)
 
-- [ ] Pick the retriever's voice from generated candidates
+- [x] Joey's voice chosen: B4 → `voice/joey.json` (Chatterbox, ref `voice/joey_ref.wav`, exaggeration 0.6, cfg 0.5, no pitch shift, seed 42). Use `scripts/tts.py --voice joey`.
 - [ ] Create main + sandbox YouTube channels (Brand Accounts under one Google account is fine)
 - [ ] Switch askjoey.ai to Professional (Creator); create sandbox Instagram Professional account
 - [ ] Google Cloud project: enable YouTube Data API v3, OAuth consent; **apply for API audit early** (unaudited projects can only upload as private)
@@ -64,8 +64,8 @@ Starting from zero (no accounts yet). Last updated: 2026-10-20.
 
 ## POC order
 
-1. **Voice** — Chatterbox on CPU: install, generate 3–4 cute retriever voice candidates, user picks one, lock settings into `voice/`. ← *current*
-2. **Character + render** — golden retriever SVG rig lip-syncing to voice → 9:16 MP4.
+1. **Voice** — ✅ done. Joey = Chatterbox preset `voice/joey.json`. (~6.5× real-time on CPU → ~3 min for a 25s script.)
+2. **Character + render** — Joey SVG rig lip-syncing to voice → 9:16 MP4. ← *next*
 3. **Research → script** — one day's ideas + script committed.
 4. **Feasibility checks** — Drive large-file upload, Instagram link fetch.
 5. **Publishing** — after accounts exist.
