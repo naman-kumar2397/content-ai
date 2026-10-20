@@ -19,7 +19,7 @@ os.makedirs(OUT, exist_ok=True)
 
 JOEY_POS = (0.0, 0.0, 0.0)
 BALL_POS = (1.18, -0.95, 0.0)
-HUGSY_POS = (1.30, -1.0, 0.0)
+HUGSY_POS = (1.12, -1.05, 0.0)
 
 
 def look_at(ob, target):
@@ -143,7 +143,7 @@ def build_scene(joey=True, ball=True, hugsy=False):
     if hugsy:
         if joey:
             h = build_hugsy.build_hugsy(HUGSY_POS)
-            h.rotation_euler = (-0.2, 0, -0.85)   # turned toward Joey, chin up
+            h.rotation_euler = (-0.15, 0, -0.45)   # turned toward Joey, chin up
         else:
             h = build_hugsy.build_hugsy((0, 0, 0))
     return j, b, h
@@ -168,7 +168,7 @@ if ONLY in ('all', 'joey'):
 if ONLY == 'ball' or (ONLY == 'all' and SIDEKICK == 'ball'):
     render('ball_front', 1080, 1350, False, True, (-0.4, -3.6, 0.9), (0, 0, 0.5), 85, 'ball', 2.8)
 if ONLY in ('hugsy', 'all') and SIDEKICK == 'hugsy':
-    render('hugsy_front', 1080, 1350, False, False, (-0.5, -4.2, 0.95), (0, 0, 0.62), 85, 'hugsy', 2.8, hugsy=True)
+    render('hugsy_front', 1080, 1350, False, False, (-0.5, -4.9, 1.0), (0, 0, 0.72), 85, 'hugsy', 2.8, hugsy=True)
 if ONLY in ('all', 'duo'):
     if SIDEKICK == 'ball': render('duo', 1080, 1920, True, True, (0.2, -6.5, 1.35), (0.50, 0, 1.95), 65, 'joey', 3.2, 'HORIZONTAL')
     else: render('duo_hugsy', 1080, 1920, True, False, (0.2, -6.5, 1.35), (0.50, 0, 1.95), 65, 'joey', 3.2, 'HORIZONTAL', hugsy=True)
