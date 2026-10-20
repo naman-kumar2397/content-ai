@@ -13,8 +13,8 @@ Starting from zero (no accounts yet). Last updated: 2026-10-20.
 | Budget | **$0** — Claude subscription only. No paid APIs. Open-source tools, free official APIs. |
 | Voice | **Original "cute golden retriever" character voice** (NOT the user's voice — changed 2026-10-20). Generated with **Chatterbox** (Resemble AI, MIT) on CPU, from a permissively licensed reference speaker + expressive settings + pitch shift. Never imitate a real person or existing cartoon character. Fallback: Kokoro (Apache 2.0) preset voices + pitch shift. Avoid F5-TTS / XTTS (non-commercial model licenses). |
 | Visual style | **Motion graphics**, written as HTML/SVG/GSAP code per scene (approach inspired by `yihui-dev/awesome-opus5-5-videos`) |
-| Character | **Golden retriever** mascot, consistent across all explainers. Built as an SVG rig animated with GSAP (consistency for free). Lip-synced via Rhubarb. |
-| Sandbox | **Separate sandbox accounts**: 2nd YouTube channel (private/unlisted uploads) + 2nd Instagram Professional account set to private |
+| Character | **Golden retriever** mascot, voice/personality: **goofy best friend, male**, consistent across all explainers. Built as an SVG rig animated with GSAP (consistency for free). Lip-synced via Rhubarb. |
+| Sandbox | **Separate sandbox accounts**: 2nd YouTube channel (private/unlisted uploads) + 2nd Instagram Professional account. Note: Instagram Professional accounts **cannot be private** (API requires Professional) → sandbox IG is public but obscure (no hashtags, no followers), posts deleted after verification. |
 | Approval | **Human approval step: YES** for the first weeks. Claude emails sandbox links (Gmail MCP); user replies "ship" → publish to main. |
 | Music | Royalty-free only (Pixabay / YouTube Audio Library), curated one-time pack of ~20 tracks stored in repo; Claude picks by mood. No trending IG audio (not possible via API). |
 | Publishing | Official APIs via our own scripts (no third-party MCP holding tokens): YouTube Data API v3, Instagram API with Instagram Login |
