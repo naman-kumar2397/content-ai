@@ -140,3 +140,16 @@ def box_obj(name, half, bevel=0.015):
     me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
     ob = bpy.data.objects.new(name, me); _link(ob)
     return ob
+
+
+def carve(ob, cutter):
+    """Boolean-difference 'cutter' out of ob (exact). New cut faces take the cutter's material (appended slot)."""
+    md = ob.modifiers.new('Carve', 'BOOLEAN')
+    md.operation = 'DIFFERENCE'; md.solver = 'EXACT'; md.object = cutter
+    try:
+        md.material_mode = 'TRANSFER'
+    except Exception:
+        pass
+    bpy.context.view_layer.update()
+    _replace_with_evaluated(ob)
+    ob.data.shade_flat()

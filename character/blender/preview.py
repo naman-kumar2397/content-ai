@@ -18,7 +18,7 @@ ONLY = arg('--only', 'all'); OUT = arg('--out', os.path.join(ROOT, 'renders'))
 os.makedirs(OUT, exist_ok=True)
 
 JOEY_POS = (0.0, 0.0, 0.0)
-BALL_POS = (1.5, -0.75, 0.0)
+BALL_POS = (1.18, -0.95, 0.0)
 
 
 def look_at(ob, target):
@@ -57,7 +57,7 @@ def setup_desk():
     ramp.color_ramp.elements[0].color = (0.03, 0.017, 0.012, 1); ramp.color_ramp.elements[1].color = (0.11, 0.06, 0.04, 1)
     nt.links.new(tc.outputs['Object'], mp.inputs[0]); nt.links.new(mp.outputs[0], wv.inputs['Vector'])
     nt.links.new(wv.outputs['Fac'], ramp.inputs[0]); nt.links.new(ramp.outputs[0], b.inputs['Base Color'])
-    b.inputs['Roughness'].default_value = 0.42
+    b.inputs['Roughness'].default_value = 0.72
     f.data.materials.append(m)
     # back wall
     bpy.ops.mesh.primitive_plane_add(size=1, location=(0, 7, 5), rotation=(math.pi / 2, 0, 0))
@@ -68,6 +68,24 @@ def setup_desk():
     w.data.materials.append(wm)
 
 
+def setup_bokeh():
+    import random
+    rnd = random.Random(4)
+    for i in range(28):
+        warm = rnd.random() < 0.6
+        col = (1.0, rnd.uniform(0.55, 0.8), rnd.uniform(0.2, 0.4), 1) if warm else (0.35, rnd.uniform(0.5, 0.7), 1.0, 1)
+        r = rnd.uniform(0.10, 0.28)
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=r, segments=12, ring_count=8,
+            location=(rnd.uniform(-4.5, 4.5), 6.5, rnd.uniform(1.2, 6.5)))
+        o = bpy.context.object; o.name = 'Bokeh%d' % i
+        m = bpy.data.materials.new('Bk%d' % i); m.use_nodes = True; nt = m.node_tree
+        nt.nodes.clear(); em = nt.nodes.new('ShaderNodeEmission'); em.inputs['Color'].default_value = col
+        em.inputs['Strength'].default_value = rnd.uniform(2, 5.5)
+        out = nt.nodes.new('ShaderNodeOutputMaterial'); nt.links.new(em.outputs[0], out.inputs[0])
+        o.data.materials.append(m)
+        o.visible_shadow = False
+
+
 def area(name, loc, target, energy, color, size):
     d = bpy.data.lights.new(name, 'AREA'); d.energy = energy; d.color = color; d.size = size
     o = bpy.data.objects.new(name, d); bpy.context.collection.objects.link(o)
@@ -75,7 +93,7 @@ def area(name, loc, target, energy, color, size):
 
 
 def setup_lights(target):
-    area('Key', (-5.5, -3.5, 3.6), target, 1500, (1.0, 0.68, 0.40), 3.5)
+    area('Key', (-5.5, -3.5, 3.6), target, 1500, (1.0, 0.75, 0.45), 3.5)
     area('Fill', (3.5, -5.0, 0.8), target, 160, (0.35, 0.5, 1.0), 4.0)
     area('Rim', (3.5, 3.8, 3.6), target, 700, (0.30, 0.50, 1.0), 2.5)
     area('Rim2', (-4.0, 3.5, 2.5), target, 250, (0.35, 0.5, 1.0), 2.5)
@@ -110,9 +128,9 @@ def reset():
 
 
 def build_scene(joey=True, ball=True):
-    reset(); setup_world(); setup_desk()
+    reset(); setup_world(); setup_desk(); setup_bokeh()
     j = build_joey.build_joey(JOEY_POS) if joey else None
-    b = build_ball.build_ball(BALL_POS if joey else (0, 0, 0)) if ball else None
+    b = build_ball.build_ball(BALL_POS, yaw=-0.5, tilt=-0.12) if (ball and joey) else (build_ball.build_ball((0, 0, 0)) if ball else None)
     return j, b
 
 
@@ -135,6 +153,6 @@ if ONLY in ('all', 'joey'):
 if ONLY in ('all', 'ball'):
     render('ball_front', 1080, 1350, False, True, (-0.4, -3.6, 0.9), (0, 0, 0.5), 85, 'ball', 2.8)
 if ONLY in ('all', 'duo'):
-    render('duo', 1080, 1920, True, True, (-0.2, -6.0, 1.7), (0.45, 0, 1.2), 65, 'joey', 3.2, 'HORIZONTAL')
+    render('duo', 1080, 1920, True, True, (0.2, -6.5, 1.35), (0.50, 0, 1.95), 65, 'joey', 3.2, 'HORIZONTAL')
     if SCALE == 100 and ONLY == 'all':
         bpy.ops.wm.save_as_mainfile(filepath=os.path.join(HERE, 'characters.blend'))

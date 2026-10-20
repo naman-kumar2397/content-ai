@@ -9,7 +9,7 @@ R = 0.40
 FOOT_H = 0.10
 
 
-def seam_obj(body, zc, k=0.30, half_w=0.072, nseg=260, ncol=7, rot=(0, 0, 0)):
+def seam_obj(body, zc, k=0.22, half_w=0.062, nseg=260, ncol=7, rot=(0, 0, 0)):
     """White tennis-ball seam ribbon, projected onto the faceted body (shrinkwrap) so it follows the facets."""
     from mathutils import Euler
     rm = Euler(rot).to_matrix()
@@ -45,7 +45,7 @@ def seam_obj(body, zc, k=0.30, half_w=0.072, nseg=260, ncol=7, rot=(0, 0, 0)):
     return ob
 
 
-def build_ball(location=(0, 0, 0), seed=5, seam_rot=None):
+def build_ball(location=(0, 0, 0), seed=5, seam_rot=None, yaw=0.0, tilt=0.0):
     import os
     if seam_rot is None:
         seam_rot = tuple(float(x) for x in os.environ.get('SEAMROT', '1.3,0,2.2').split(','))
@@ -53,7 +53,7 @@ def build_ball(location=(0, 0, 0), seed=5, seam_rot=None):
         ball=make_mat('B_Fuzz', '#B4D61C', 0.95, tint=1, sheen=1.0, spec=0.15),
         seam=make_mat('B_Seam', '#F4F4EA', 0.9, tint=1, sheen=0.3),
         eye=make_mat('B_Eye', '#050505', 0.2, spec=0.8, coat=0.8),
-        foot=make_mat('B_Foot', '#1B1F10', 0.6),
+        foot=make_mat('B_Foot', '#7C9610', 0.7),
     )
     # fuzz bump on ball material
     nt = mats['ball'].node_tree
@@ -77,7 +77,7 @@ def build_ball(location=(0, 0, 0), seed=5, seam_rot=None):
     for side, sx in (('L', -1), ('R', 1)):
         e = box_obj('Ball_Eye' + side, (0.05, 0.03, 0.115), bevel=0.018)
         finish(e); assign(e, mats['eye'])
-        e.location = (sx * 0.13, -R * 0.93, zc + 0.10)
+        e.location = (sx * 0.13, -R * 0.93, zc + 0.13)
         e.rotation_euler = (0.0, sx * 0.08, 0)
         # bevel-ish: squash sphere to rect-ish via 'cube' look using scale
         eyes[side] = e
@@ -91,6 +91,7 @@ def build_ball(location=(0, 0, 0), seed=5, seam_rot=None):
     for ob in (seam, eyes['L'], eyes['R'], feet['L'], feet['R']):
         parent_keep(ob, body)
     body.location = Vector(location) + Vector((0, 0, zc))
+    body.rotation_euler = (tilt, 0, yaw)
     bpy.context.view_layer.update()
     return body
 
