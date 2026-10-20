@@ -52,6 +52,12 @@ Starting from zero (no accounts yet). Last updated: 2026-10-20.
 - Gmail: askjoey.ai@gmail.com
 - Instagram (main): askjoey.ai
 
+## Windsor.ai (connected 2026-10-20, TRIAL plan — paid after trial, conflicts with $0 budget)
+
+- Instagram `askjoey.ai` (id 17841450494293781): **can publish Reels** via `create_video_post` (needs a *publicly accessible* MP4 URL), stories, image posts, comments.
+- YouTube `askjoey.ai@gmail.com`: **read-only analytics** — no upload. YouTube publishing still needs YouTube Data API v3.
+- Open: public video hosting for IG (Drive links aren't direct MP4); decide Windsor vs direct Instagram API before trial ends.
+
 ## User to-do (not blocking POCs)
 
 - [x] Joey's voice chosen: B4 → `voice/joey.json` (Chatterbox, ref `voice/joey_ref.wav`, exaggeration 0.6, cfg 0.5, no pitch shift, seed 42). Use `scripts/tts.py --voice joey`.
@@ -65,7 +71,7 @@ Starting from zero (no accounts yet). Last updated: 2026-10-20.
 ## POC order
 
 1. **Voice** — ✅ done. Joey = Chatterbox preset `voice/joey.json`. (~6.5× real-time on CPU → ~3 min for a 25s script.)
-2. **Character + render** — Joey SVG rig lip-syncing to voice → 9:16 MP4. ← *next*
+2. **Character + render** — (first 3 SVG styles rejected by user 2026-10-20) Joey rig lip-syncing to voice → 9:16 MP4. ← *next*
 3. **Research → script** — one day's ideas + script committed.
 4. **Feasibility checks** — Drive large-file upload, Instagram link fetch.
 5. **Publishing** — after accounts exist.
