@@ -49,13 +49,14 @@ export async function startServer(sink) {
 
 const BACKENDS = {
   swiftshader: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
-  // Mesa llvmpipe through ANGLE's GL/EGL backend (surfaceless); LP_NUM_THREADS controls its raster threads
-  llvmpipe: ['--use-angle=gl-egl', '--use-gl=angle', '--ozone-platform=headless', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader', '--disable-gpu-sandbox'],
+  // Mesa llvmpipe through ANGLE's desktop-GL backend. Needs a headed browser under Xvfb (xvfb-run); headless
+  // Chromium silently falls back to SwiftShader. LP_NUM_THREADS controls llvmpipe's raster threads.
+  llvmpipe: ['--use-angle=gl', '--ignore-gpu-blocklist', '--disable-gpu-sandbox'],
 };
 
 export async function openWorker(srv, opts, backend = 'swiftshader') {
   const exe = process.env.CHROMIUM_PATH;
-  const browser = await chromium.launch({ ...(exe ? { executablePath: exe } : {}), args: BACKENDS[backend],
+  const browser = await chromium.launch({ ...(exe ? { executablePath: exe } : {}), args: BACKENDS[backend], headless: backend !== 'llvmpipe',
     env: { ...process.env, LP_NUM_THREADS: process.env.LP_NUM_THREADS || '4', GALLIUM_DRIVER: 'llvmpipe' } });
   const page = await browser.newPage({ viewport: { width: 270, height: 480 } });
   page.on('console', (m) => { if (m.type() === 'error') console.log('[page]', m.text()); });
@@ -125,7 +126,7 @@ export async function animate({ opts, fps, n, workers = 1, out, audio, backend =
       const r = await x.page.evaluate(async ({ t, i, capture }) => {
         if (capture === 'pipelined') return window.renderSend(t, i);
         const a = performance.now(); await window.renderAt(t); const px = window.grab(); const b = performance.now();
-        await fetch('/frame/' + i, { method: 'POST', body: px });
+        await fetch('/frame/' + i, { method: 'POST', body: new Blob([px]) });
         return { r: b - a, c: performance.now() - b };
       }, { t: i / fps, i, capture });
       renderMs += r.r;

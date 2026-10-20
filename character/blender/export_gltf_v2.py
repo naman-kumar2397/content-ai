@@ -57,18 +57,24 @@ def joey_shapes():
         return falloff((p - mouth_c).length, r)
     # Wide (E / C): corners pull outward + up; Narrow (O/U): corners in, lips forward
     def wide(p):
-        w = near_mouth(p); return p + Vector((0.10 * p.x / 0.4 * w, 0, 0.035 * abs(p.x) / 0.4 * w))
+        w = near_mouth(p); return p + Vector((0.16 * p.x / 0.4 * w, 0, 0.05 * abs(p.x) / 0.4 * w))
     def narrow(p):
-        w = near_mouth(p); return p + Vector((-0.11 * p.x / 0.4 * w, -0.05 * w, 0))
+        w = near_mouth(p); return p + Vector((-0.20 * p.x / 0.4 * w, -0.08 * w, 0))
     # Smile: cheek lobes squash up + out (eyes squint a touch via the head key too)
     def smile(p):
         w = 0.0
         for sx in (-1, 1):
             w = max(w, falloff((p - Vector((sx * 0.33, -0.45, 1.62))).length, 0.32))
         return p + Vector((0.03 * (1 if p.x > 0 else -1) * w, -0.01 * w, 0.06 * w))
+    # Close: upper lip drops over the carved mouth opening (front verts only) so closed visemes really close
+    def close(p):
+        if p.y > -0.3: return p
+        w = falloff((Vector((p.x * 0.8, 0, p.z)) - Vector((0, 0, 1.50))).length, 0.36)
+        return p + Vector((0, 0.02 * w, -0.17 * w))
     for n in ('Joey_Muzzle', 'Joey_Head', 'Joey_Mouth'):
         ob = O[n]
         shape_key(ob, 'Wide', wide); shape_key(ob, 'Narrow', narrow); shape_key(ob, 'Smile', smile)
+        shape_key(ob, 'Close', close)
     jaw = O['Joey_Jaw']
     shape_key(jaw, 'Wide', wide); shape_key(jaw, 'Narrow', narrow)
     # FV: lower lip tucks up and back under the upper teeth
@@ -87,12 +93,12 @@ def joey_brows(mats):
     """Low-poly brow tufts (one mesh, both sides) with Up / Down / Worried / Angry keys."""
     parts = []
     for sx in (-1, 1):
-        parts += [((sx * 0.29, -0.565, 2.055), (0.11, 0.045, 0.032), (0, sx * 0.12, 0)),
-                  ((sx * 0.21, -0.58, 2.045), (0.06, 0.04, 0.03))]
+        parts += [((sx * 0.29, -0.585, 2.03), (0.10, 0.04, 0.028), (0, sx * 0.12, 0)),
+                  ((sx * 0.21, -0.60, 2.02), (0.055, 0.035, 0.026))]
     b = build_mesh_obj('Joey_Brows', parts, seg=12, rings=8)
     facet(b, voxel=0.018, tris=160, lump=0.01, seed=21)
     assign(b, mats)
-    set_pivot(b, (0, -0.57, 2.05))
+    set_pivot(b, (0, -0.59, 2.025))
     inner = lambda p: max(0.0, 1.0 - abs(p.x) / 0.45)            # 1 at the inner ends, 0 outside
     shape_key(b, 'Up', lambda p: p + Vector((0, 0.01, 0.07)))
     shape_key(b, 'Down', lambda p: p + Vector((0, -0.01, -0.045)))
@@ -294,7 +300,7 @@ def main():
     NS['setup_lights']((0.50, 0, 1.95))
     # window opening: cut the bake wall so light/AO near it matches the three.js wall
     j = build_joey.build_joey((0, 0, 0))
-    jm = make_mat('J_Brow', build_joey.C_EAR, 0.9, tint=1, sheen=0.4)
+    jm = make_mat('J_Brow', '#B98A3C', 0.9, tint=1, sheen=0.4)
     brows = joey_brows(jm); parent_keep(brows, bpy.data.objects['Joey_Head'])
     h = build_hugsy.build_hugsy((0, 0, 0))
     h.location = HUGSY_POS; h.rotation_euler = HUGSY_ROT

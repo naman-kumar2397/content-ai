@@ -47,17 +47,18 @@ function saccades(seed, dur) {
 
 // Rhubarb shapes -> rig params. jaw in degrees relative to rest (rest = happy open pant).
 const VISEMES = {
-  X: { jaw: -10, wide: 0.0, narrow: 0.0, fv: 0, tIn: 0.3, tUp: 0 },
-  A: { jaw: -19, wide: 0.1, narrow: 0.0, fv: 0, tIn: 1.0, tUp: 0 },   // M B P: closed
-  B: { jaw: -12, wide: 0.45, narrow: 0.0, fv: 0, tIn: 0.9, tUp: 0 },  // K S T ...: slightly open, teeth
-  C: { jaw: -3, wide: 0.7, narrow: 0.0, fv: 0, tIn: 0.6, tUp: 0 },    // EH AE: open
-  D: { jaw: 8, wide: 0.35, narrow: 0.0, fv: 0, tIn: 0.3, tUp: 0 },    // AA: wide open
-  E: { jaw: -4, wide: 0.0, narrow: 0.6, fv: 0, tIn: 0.7, tUp: 0 },    // AO ER: rounded
-  F: { jaw: -12, wide: 0.0, narrow: 1.0, fv: 0, tIn: 1.0, tUp: 0 },   // UW OW W: puckered
-  G: { jaw: -15, wide: 0.2, narrow: 0.0, fv: 1, tIn: 1.0, tUp: 0 },   // F V
-  H: { jaw: -4, wide: 0.3, narrow: 0.0, fv: 0, tIn: 0.2, tUp: 1 },    // L: tongue up
+  X: { jaw: -12, close: 0.35, wide: 0.0, narrow: 0.0, fv: 0, tIn: 0.4, tUp: 0 },
+  A: { jaw: -24, close: 1.0, wide: 0.1, narrow: 0.0, fv: 0, tIn: 1.0, tUp: 0 },   // M B P: closed
+  B: { jaw: -16, close: 0.65, wide: 0.5, narrow: 0.0, fv: 0, tIn: 0.9, tUp: 0 },  // K S T ...: slightly open, teeth
+  C: { jaw: -4, close: 0.2, wide: 0.8, narrow: 0.0, fv: 0, tIn: 0.6, tUp: 0 },    // EH AE: open
+  D: { jaw: 8, close: 0.0, wide: 0.35, narrow: 0.0, fv: 0, tIn: 0.3, tUp: 0 },    // AA: wide open
+  E: { jaw: -6, close: 0.3, wide: 0.0, narrow: 0.7, fv: 0, tIn: 0.7, tUp: 0 },    // AO ER: rounded
+  F: { jaw: -14, close: 0.55, wide: 0.0, narrow: 1.0, fv: 0, tIn: 1.0, tUp: 0 },  // UW OW W: puckered
+  G: { jaw: -18, close: 0.75, wide: 0.25, narrow: 0.0, fv: 1, tIn: 1.0, tUp: 0 }, // F V
+  H: { jaw: -4, close: 0.2, wide: 0.3, narrow: 0.0, fv: 0, tIn: 0.2, tUp: 1 },    // L: tongue up
 };
-const VKEYS = ['jaw', 'wide', 'narrow', 'fv', 'tIn', 'tUp'];
+const IDLE = { jaw: -2, close: 0, tIn: 0.15 };   // between lines: Joey's happy open pant
+const VKEYS = ['jaw', 'close', 'wide', 'narrow', 'fv', 'tIn', 'tUp'];
 function visemeTrack(cues, offset, xfade = 0.06) {
   // cues: [{start, end, value}] (Rhubarb JSON). Blend each new shape in over xfade seconds.
   const list = (cues || []).map((c) => ({ t: c.start + offset, v: VISEMES[c.value] || VISEMES.X }));
@@ -79,7 +80,7 @@ class Spring {
   step(target, dt, force = 0) { const a = this.k * (target - this.x) - this.c * this.v + force; this.v += a * dt; this.x += this.v * dt; return this.x; }
 }
 
-export function createAnim({ nodes: N, camera, camPos, camTgt, focusPt, seed = 1, timeline }) {
+export function createAnim({ nodes: N, camera, camPos, camTgt, focusPt, seed = 1, timeline, debugCam }) {
   const TL = Object.assign({ duration: 6, lineStart: 0.45, cues: [], push: 0.07 }, timeline || {});
   const rest = {};
   for (const [k, n] of Object.entries(N)) rest[k] = { p: n.position.clone(), r: n.rotation.clone(), s: n.scale.clone() };
@@ -143,13 +144,13 @@ export function createAnim({ nodes: N, camera, camPos, camTgt, focusPt, seed = 1
       const v = vis(t);
       s.earL.step(0, DT, -acc.z * 0.9 - acc.y * 0.4); s.earR.step(0, DT, -acc.z * 0.9 + acc.y * 0.4);
       s.earLx.step(0, DT, -acc.x * 0.8); s.earRx.step(0, DT, -acc.x * 0.8);
-      const jawT = (v.jaw * talking(t) + VISEMES.X.jaw * (1 - talking(t))) * D2R;
+      const jawT = (v.jaw * talking(t) + IDLE.jaw * (1 - talking(t))) * D2R;
       const jawPrev = s.jaw.x; s.jaw.step(jawT, DT);
       s.tongue.step(0, DT, -(s.jaw.x - jawPrev) / DT * 60 - acc.x * 0.6);
       // Hugsy: flipper R goes up with anticipation/overshoot, L follows through, body squashes & counter-twists
       s.flipR.step(tg.flip, DT); s.flipL.step(0, DT, -s.flipR.v * 6);
       s.hugBody.step(0, DT, -s.flipR.v * 9 + (tg.squint > 0 && tg.squint < 1 ? 4 : 0));
-      s.hugTwist.step(0.12 * tg.squint, DT);
+      s.hugTwist.step(0.55 * tg.squint, DT);   // deadpan glance to camera
       sim.t += DT;
     }
     return sim;
@@ -173,10 +174,11 @@ export function createAnim({ nodes: N, camera, camPos, camTgt, focusPt, seed = 1
     const vw = talk, smile = 0.45 + 0.35 * tg.pop * (1 - smooth((t - lineEnd) / 0.5)) - 0.35 * tg.tilt;
     for (const n of ['Joey_Muzzle', 'Joey_Head', 'Joey_Mouth', 'Joey_Jaw']) {
       setMorph(n, 'Wide', v.wide * vw); setMorph(n, 'Narrow', v.narrow * vw);
+      if (n !== 'Joey_Jaw') setMorph(n, 'Close', v.close * vw + IDLE.close * (1 - vw));
       if (n !== 'Joey_Jaw') setMorph(n, 'Smile', Math.max(0, smile));
     }
     setMorph('Joey_Jaw', 'FV', v.fv * vw);
-    setMorph('Joey_Tongue', 'In', (v.tIn * vw + 0.15 * (1 - vw)));
+    setMorph('Joey_Tongue', 'In', (v.tIn * vw + IDLE.tIn * (1 - vw)));
     setMorph('Joey_Tongue', 'Up', v.tUp * vw);
     if (N.Joey_Tongue) N.Joey_Tongue.rotation.x = R('Joey_Tongue').r.x + s.tongue.x;
     // brows: up with excitement, worried at the beat; little emphasis bumps while talking
@@ -209,17 +211,18 @@ export function createAnim({ nodes: N, camera, camPos, camTgt, focusPt, seed = 1
     }
     const hbk = blinkAmt(t, hBlinks), hs = hSac(t);
     for (const e of ['Hugsy_EyeL', 'Hugsy_EyeR']) if (N[e]) {
-      N[e].scale.y = R(e).s.y * (1 - 0.55 * tg.squint) * (1 - 0.9 * hbk);
+      N[e].scale.y = R(e).s.y * (1 - 0.6 * tg.squint) * (1 - 0.9 * hbk);
       N[e].position.x = R(e).p.x + 0.006 * hs.x * (1 - tg.squint);
     }
     // deadpan: flat brows (inner ends down), then one sarcastic raise as the flipper peaks
     const sarc = pulse(t, hugFlip + 0.35, TL.duration + 1, 0.25);
-    setMorph('Hugsy_BrowL', 'InnerDown', tg.squint); setMorph('Hugsy_BrowR', 'InnerDown', tg.squint * (1 - sarc));
+    setMorph('Hugsy_BrowL', 'InnerDown', 0.3 * tg.squint); setMorph('Hugsy_BrowR', 'InnerDown', 0.3 * tg.squint * (1 - sarc));
     setMorph('Hugsy_BrowR', 'Raise', sarc); setMorph('Hugsy_BrowR', 'InnerUp', 0.4 * sarc);
-    if (N.Hugsy_Brows) N.Hugsy_Brows.position.y = R('Hugsy_Brows').p.y - 0.012 * tg.squint;
+    if (N.Hugsy_Brows) N.Hugsy_Brows.position.y = R('Hugsy_Brows').p.y - 0.03 * tg.squint;   // brows sit low on the lids: deadpan
     setMorph('Hugsy_BeakLower', 'Open', 0.12 * pulse(t, hugFlip + 0.1, hugFlip + 0.5, 0.1));   // tiny "hmph"
-    if (N.Hugsy_FlipperR) N.Hugsy_FlipperR.rotation.z = R('Hugsy_FlipperR').r.z + 1.15 * s.flipR.x;
-    if (N.Hugsy_FlipperL) N.Hugsy_FlipperL.rotation.z = R('Hugsy_FlipperL').r.z + 0.25 * s.flipL.x + 0.03 * Math.sin(t * 1.7);
+    // the camera-side flipper (L) does the raise; the far one (R) only follows through
+    if (N.Hugsy_FlipperL) { N.Hugsy_FlipperL.rotation.z = R('Hugsy_FlipperL').r.z - 1.25 * s.flipR.x; N.Hugsy_FlipperL.rotation.x = R('Hugsy_FlipperL').r.x - 0.5 * s.flipR.x; }
+    if (N.Hugsy_FlipperR) N.Hugsy_FlipperR.rotation.z = R('Hugsy_FlipperR').r.z + 0.25 * s.flipL.x + 0.03 * Math.sin(t * 1.7);
     // ---------------- camera: slow push-in + handheld drift (rotation noise ~0.15 deg, position ~1 cm)
     camera.position.copy(cam0.pos); camera.up.set(0, 1, 0); camera.lookAt(cam0.tgt);
     if (!opt.restCamera) {
@@ -230,6 +233,7 @@ export function createAnim({ nodes: N, camera, camPos, camTgt, focusPt, seed = 1
       camera.rotateY(0.0026 * nCam[2](t * 0.6)); camera.rotateX(0.0022 * nCam[3](t * 0.55));
       camera.rotateZ(0.0015 * nCam[0](t * 0.4 + 9));
     }
+    if (debugCam) { camera.position.set(...debugCam.pos); camera.lookAt(new THREE.Vector3(...debugCam.tgt)); }
     camera.updateMatrixWorld();
     return { hash: stateHash() };
   }

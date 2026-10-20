@@ -44,7 +44,7 @@ export async function measure(opts, backend = 'swiftshader', n = N) {
     { const a = performance.now(); for (let i = 0; i < n; i++) await window.renderSend(0.5 + i * 0.37, 0); await window.flushSend(); pip = (performance.now() - a) / n / 1000; }
     for (let i = 0; i < n; i++) {
       const a = performance.now(); await window.renderAt(0.5 + i * 0.37); const px = window.grab(); const b = performance.now();
-      await fetch('/frame/0', { method: 'POST', body: px }); const c = performance.now();
+      await fetch('/frame/0', { method: 'POST', body: new Blob([px]) }); const c = performance.now();
       if (i === 0) { window.toPNG(); png = performance.now() - c; }
       fr += b - a; raw += c - b;
     }
@@ -66,7 +66,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     console.log(`\n| config (${backend}) | s/frame (render+readback) | raw POST s | PNG encode s | pipelined render+capture s/frame | plate s (once) |\n|---|---|---|---|---|---|`);
     for (const r of rows) console.log(`| ${r.name} | **${r.frame.toFixed(2)}** | ${r.post.toFixed(2)} | ${r.png.toFixed(2)} | ${r.pipelined.toFixed(2)} | ${r.plate.toFixed(1)} |`);
   } else {
-    const opts = { ...CONFIGS['plate (bg once), MSAA4, shadow 1024'], ...JSON.parse(A('--json', '{}')) };
+    const opts = { ...CONFIGS['layered plate, MSAA4, PCF 1024'], ...JSON.parse(A('--json', '{}')) };
     const n = +A('--frames', 48);
     for (const w of (A('--workers', '1,2,3')).split(',').map(Number)) {
       const r = await animate({ opts, fps: 24, n, workers: w, out: path.join(HERE, 'out', `bench_w${w}.mp4`), backend, dedupe: false });

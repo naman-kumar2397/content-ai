@@ -162,9 +162,9 @@ function withBake(mat, U) {
       .replace('#include <color_vertex>', '#include <color_vertex>\nvGI = color_1;');
     sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec4 vGI; uniform float uAO, uDirAO, uGI;')
       .replace('#include <aomap_fragment>', `#include <aomap_fragment>
-        float bAO = mix(1.0, vGI.a, uAO);
+        float ao = max(vGI.a, 0.3); float bAO = mix(1.0, ao, uAO);
         reflectedLight.indirectDiffuse *= bAO; reflectedLight.indirectSpecular *= bAO;
-        reflectedLight.directDiffuse *= mix(1.0, vGI.a, uDirAO);
+        reflectedLight.directDiffuse *= mix(1.0, ao, uDirAO);
         totalEmissiveRadiance += diffuseColor.rgb * vGI.rgb * uGI;`);
   };
   mat.customProgramCacheKey = () => 'baked';
@@ -243,7 +243,7 @@ async function setup(opts = {}) {
     s.position.set(...L.location); s.target = tgt; s.layers.enableAll();
     const sh = (size, radius, bias) => {
       s.castShadow = true; s.shadow.mapSize.set(size, size); s.shadow.camera.near = 2; s.shadow.camera.far = 20;
-      s.shadow.radius = radius; s.shadow.blurSamples = o.blurSamples ?? 16; s.shadow.bias = bias; s.shadow.focus = o.shadowFocus;
+      s.shadow.radius = radius; s.shadow.blurSamples = o.blurSamples ?? 16; s.shadow.bias = bias; s.shadow.normalBias = o.normalBias ?? 0.03; s.shadow.focus = o.shadowFocus;
       shadowLights.push(s);
     };
     if (L.name === 'Key' && o.shadows) sh(o.shadowSize, 14 * o.shadowSize / 2048, -0.0004);
@@ -312,7 +312,7 @@ async function setup(opts = {}) {
   const out = new OutputPass();
   const rtOut = new THREE.WebGLRenderTarget(o.w, o.h, { type: THREE.UnsignedByteType });
 
-  const anim = createAnim({ nodes, camera, camPos, camTgt, focusPt, seed: o.seed, timeline: o.timeline });
+  const anim = createAnim({ nodes, camera, camPos, camTgt, focusPt, seed: o.seed, timeline: o.timeline, debugCam: o.debugCam });
 
   S = { charRoots: [joey, hugsy], o, sc, renderer, scene, camera, camPos, camTgt, focusPt, nodes, rtScene, rtA, rtB, gtao, dof, smaa, out, rtOut,
     shadowLights, anim, makeDof, depthTex, plate: null, lastHash: null };
@@ -337,8 +337,13 @@ function buildPlate(t0 = 0) {
   const depth = new THREE.DepthTexture(pw, ph); depth.type = THREE.UnsignedIntType;
   const rtP = new THREE.WebGLRenderTarget(pw, ph, { type: THREE.HalfFloatType, samples: 4, depthTexture: depth });
   const rtD = new THREE.WebGLRenderTarget(pw, ph, { type: THREE.HalfFloatType });
-  for (const l of S.shadowLights) l.shadow.camera.layers.mask = (1 << BG) | (1 << FG);   // characters' shadows land on the plate
+  // characters' shadows must land on the plate: three.js picks shadow casters with the *main* camera's layers, so the
+  // characters stay in this pass but write neither colour nor depth
+  pcam.layers.mask = (1 << BG) | (1 << FG);
+  const hidden = [];
+  for (const root of S.charRoots) root.traverse((m) => { if (m.isMesh) { hidden.push([m.material, m.material.colorWrite, m.material.depthWrite]); m.material.colorWrite = false; m.material.depthWrite = false; } });
   r.setRenderTarget(rtP); r.render(scene, pcam);
+  for (const [mt, cw, dw] of hidden) { mt.colorWrite = cw; mt.depthWrite = dw; }
   const d = S.makeDof(o.plateDofN, pw, ph, pcam); d.uniforms.tDepth.value = depth;
   d.render(r, rtD, rtP);
   rtP.dispose();
@@ -442,7 +447,7 @@ function toPNG() {
 async function renderAndPost(t, idx) {
   const res = await renderAt(t);
   const t1 = performance.now();
-  if (!res.skipped) await fetch('/frame/' + idx, { method: 'POST', body: grab() });
+  if (!res.skipped) await fetch('/frame/' + idx, { method: 'POST', body: new Blob([grab()]) });
   else await fetch('/dup/' + idx, { method: 'POST' });
   return { ...res, postMs: performance.now() - t1 };
 }
@@ -452,7 +457,7 @@ let inflight = null;
 async function renderSend(t, idx) {
   const a = performance.now(); await renderAt(t); const px = grab(); const b = performance.now();
   if (inflight) await inflight;
-  inflight = fetch('/frame/' + idx, { method: 'POST', body: px });
+  inflight = fetch('/frame/' + idx, { method: 'POST', body: new Blob([px]) });
   return { r: b - a, c: performance.now() - b };
 }
 window.flushSend = async () => { if (inflight) await inflight; inflight = null; };
