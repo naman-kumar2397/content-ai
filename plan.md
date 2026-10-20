@@ -11,14 +11,14 @@ Starting from zero (no accounts yet). Last updated: 2026-10-20.
 | Niche | AI: trending topics + trending GitHub repos |
 | Schedule | Claude scheduled task, **9:00am daily, `CRON_TZ=Australia/Melbourne`** |
 | Budget | **$0** — Claude subscription only. No paid APIs. Open-source tools, free official APIs. |
-| Voice | **User's own voice, cloned** with **Chatterbox** (Resemble AI, MIT), running on CPU in the container. Fallback: OpenVoice v2 (MIT). Avoid F5-TTS / XTTS (non-commercial model licenses). |
+| Voice | **Original "cute golden retriever" character voice** (NOT the user's voice — changed 2026-10-20). Generated with **Chatterbox** (Resemble AI, MIT) on CPU, from a permissively licensed reference speaker + expressive settings + pitch shift. Never imitate a real person or existing cartoon character. Fallback: Kokoro (Apache 2.0) preset voices + pitch shift. Avoid F5-TTS / XTTS (non-commercial model licenses). |
 | Visual style | **Motion graphics**, written as HTML/SVG/GSAP code per scene (approach inspired by `yihui-dev/awesome-opus5-5-videos`) |
 | Character | **Golden retriever** mascot, consistent across all explainers. Built as an SVG rig animated with GSAP (consistency for free). Lip-synced via Rhubarb. |
 | Sandbox | **Separate sandbox accounts**: 2nd YouTube channel (private/unlisted uploads) + 2nd Instagram Professional account set to private |
 | Approval | **Human approval step: YES** for the first weeks. Claude emails sandbox links (Gmail MCP); user replies "ship" → publish to main. |
 | Music | Royalty-free only (Pixabay / YouTube Audio Library), curated one-time pack of ~20 tracks stored in repo; Claude picks by mood. No trending IG audio (not possible via API). |
 | Publishing | Official APIs via our own scripts (no third-party MCP holding tokens): YouTube Data API v3, Instagram API with Instagram Login |
-| Inspiration | User sends Instagram links; Claude tries to fetch (often login-walled; yt-dlp may work). Fallback: screenshot/description. |
+| Inspiration | User sends Instagram links; Claude tries to fetch (often login-walled; yt-dlp may work). Fallback: screenshot/description. Confirmed: profile fetch returned HTTP 429. Reference creator: **@vaibhavsisinty** (fast-paced AI tools/news reels). |
 
 ## Pipeline
 
@@ -49,7 +49,7 @@ Starting from zero (no accounts yet). Last updated: 2026-10-20.
 
 ## User to-do (not blocking POCs)
 
-- [ ] Record 30–60s clean voice sample (quiet room, natural tone, WAV/high-quality) → `voice/reference.wav`
+- [ ] Pick the retriever's voice from generated candidates
 - [ ] Create main + sandbox YouTube channels (Brand Accounts under one Google account is fine)
 - [ ] Create main + sandbox Instagram **Professional** accounts (sandbox = private)
 - [ ] Google Cloud project: enable YouTube Data API v3, OAuth consent; **apply for API audit early** (unaudited projects can only upload as private)
@@ -59,7 +59,7 @@ Starting from zero (no accounts yet). Last updated: 2026-10-20.
 
 ## POC order
 
-1. **Voice** — Chatterbox on CPU: install, clone user's voice, measure quality + render time. ← *current*
+1. **Voice** — Chatterbox on CPU: install, generate 3–4 cute retriever voice candidates, user picks one, lock settings into `voice/`. ← *current*
 2. **Character + render** — golden retriever SVG rig lip-syncing to voice → 9:16 MP4.
 3. **Research → script** — one day's ideas + script committed.
 4. **Feasibility checks** — Drive large-file upload, Instagram link fetch.
