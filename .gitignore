@@ -3,3 +3,4 @@ output/
 __pycache__/
 .blender/
 .venv-tools/
+character/gltf/_v2_debug.blend*
