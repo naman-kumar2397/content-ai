@@ -74,7 +74,16 @@ Starting from zero (no accounts yet). Last updated: 2026-10-20.
 
 - Handle (name the dog: Joey; e.g. joey.ai / joeythegolden / askjoey.ai — check availability) and language.
 - Content mix: news vs tutorials vs "repo of the day".
-- Joey's art style + visual details.
+- Joey's art style + framing + signature item.
+
+## Joey — based on the user's real dog
+
+Character is modelled on the user's own golden retriever, Joey (channel named after him). Key traits from reference photo:
+- Pale cream / light golden coat (lighter than typical goldens), slightly darker golden ears
+- Broad, round head; big fluffy chest ruff; cream-white legs and paws
+- Large dark brown-black nose; round dark eyes with a soft, sweet expression
+- Signature look: big open-mouth smile with pink tongue
+
 
 ## Notes / risks
 
